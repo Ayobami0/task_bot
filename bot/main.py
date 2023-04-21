@@ -32,6 +32,7 @@ from telegram.ext import (
     MessageHandler,
     CallbackQueryHandler,
     filters,
+    ConversationHandler,
 )
 
 from utils.extract_task_information import extract_task
@@ -59,8 +60,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         rf"Hi {user.mention_html()}!\n You can start creating task immediately. Tasks must include 'task' to be registered as a task. Use the command /help to get addtional information",
         reply_markup=ForceReply(selective=True),
     )
+async def change_active_agent(update: Update, contex: ContextTypes.DEFAULT_TYPE):
+    """Change the active agent on shift"""
+    agent_on_shift = update.message.from_user.name
+    await update.message.reply_text(f'{agent_on_shift} is now on shift.')
 
-
+async def change_active_(update: Update, contex: ContextTypes.DEFAULT_TYPE):
+    """Change the active agent on shift"""
+    agent_on_shift = update.message.from_user.name
+    await update.message.reply_text(f'{agent_on_shift} is now on shift.')
+    
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
     await update.message.reply_text("""
@@ -82,7 +91,6 @@ Help Section for DewalletBot
 - Verification issue should start with or contain 'verify'
 """)
 
-
 async def tasks_number_command(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
@@ -102,6 +110,38 @@ async def get_tasks(
     await update.message.reply_text(
         task_list.Tasks.get_all()
     )
+
+async def payments_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handles payments with pictures of receipt"""
+    query = update.callback_query
+    message = update.message
+    keyboard1 = [
+        [
+            InlineKeyboardButton("Confirming", callback_data="confirming"),
+        ],
+        [
+            InlineKeyboardButton("Not Received", callback_data="revert"),
+        ],
+        [
+            InlineKeyboardButton("Credited", callback_data="credited"),
+        ],
+    ]
+    keyboard2 = [
+        [
+            InlineKeyboardButton("Not Received", callback_data="revert"),
+        ],
+        [
+            InlineKeyboardButton("Credited", callback_data="credited"),
+        ],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard1)
+    reply_markup2 = InlineKeyboardMarkup(keyboard2)
+    
+    if query != None:
+        await query.answer()
+        await query.message.reply_photo(query.message.photo, caption=f"{query.message.text}", reply_markup=reply_markup2)
+    else:
+        await message.reply_photo(message.photo, caption=f"{message.text}", reply_markup=reply_markup)
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Echo the task with inline buttons."""
@@ -124,7 +164,6 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(update.message.text, reply_markup=reply_markup)
     except IndexError:
         await update.message.reply_text("""An invalid task format was entered. Created tasks should follow this format:
-
 1. User's email address
 2. Service amount (i.e 250 or 1000)
 3. Sercice number (phone number, iuc number or meter number)
@@ -137,7 +176,12 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def generate_random_pin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Generates a random pin with the command /generateRandomPin"""
 
-    await update.message.reply_text(f"Sure, here's the new pin for the user:\n{randomPin(4)}")
+    await update.message.reply_text("Sure, what is the users email address?")
+
+async def confirm_email(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Generates a random pin with the command /generateRandomPin"""
+
+    await update.message.reply_text("Sure, what is the users email address?")
 
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """handles all button queries and parses their callbacks"""
@@ -279,13 +323,22 @@ def main() -> None:
         .build()
     )
 
+    # conversation handlers
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler("generateRandomPin", generate_random_pin)], 
+        states={
+            # 'EMAIL': [MessageHandler(filters.Regex() & filters.TEXT, callback)],
+            'CONFIRMATION': []
+        }, 
+        fallbacks=[])
+
     # on different commands - answer in Telegram
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("tasks", get_tasks))
-    application.add_handler(CommandHandler("generateRandomPin", generate_random_pin))
     application.add_handler(CommandHandler("numberOfTasks", tasks_number_command))
     application.add_handler(CallbackQueryHandler(verify_user_handler, pattern='yes|no|verified'))
+    application.add_handler(CallbackQueryHandler(payments_handler, pattern='confirming|credited|revert'))
     application.add_handler(CallbackQueryHandler(button))
 
     # on non command i.e message - echo the message on Telegram
