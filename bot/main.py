@@ -108,10 +108,12 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     complete_keyboard = [
         [
-            InlineKeyboardButton("Sent", callback_data="completed"),
-            InlineKeyboardButton("Invalid", callback_data="completed"),
-            InlineKeyboardButton("Reversed", callback_data="completed"),
-            InlineKeyboardButton("Was Successful", callback_data="completed"),
+            InlineKeyboardButton("Sent", callback_data="sent"),
+            InlineKeyboardButton("Invalid", callback_data="invalid"),
+        ],
+        [
+            InlineKeyboardButton("Refund", callback_data="refunded"),
+            InlineKeyboardButton("Was Successful", callback_data="success"),
         ]
     ]
     resolved_keyboard = [
@@ -134,11 +136,32 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     reply_resolved = InlineKeyboardMarkup(resolved_keyboard)
 
     match query.data:
-        case "completed":
+        case "sent":
             task_.status = "RESOLVED"
             task_list.Tasks.update(id_, task_)
             await query.edit_message_text(
                 text=f"{copied_message.text}\n\nTask resolved.",
+                reply_markup=reply_resolved,
+            )
+        case "refunded":
+            task_.status = "RESOLVED"
+            task_list.Tasks.update(id_, task_)
+            await query.edit_message_text(
+                text=f"{copied_message.text}\n\nUser refunded.",
+                reply_markup=reply_resolved,
+            )
+        case "invalid":
+            task_.status = "RESOLVED"
+            task_list.Tasks.update(id_, task_)
+            await query.edit_message_text(
+                text=f"{copied_message.text}\n\nInvalid details provided, check task an try again.",
+                reply_markup=reply_resolved,
+            )
+        case "success":
+            task_.status = "RESOLVED"
+            task_list.Tasks.update(id_, task_)
+            await query.edit_message_text(
+                text=f"{copied_message.text}\n\nWas successful the moment it was placed",
                 reply_markup=reply_resolved,
             )
         case "review" | "processing":
