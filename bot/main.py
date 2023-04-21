@@ -139,7 +139,13 @@ async def payments_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if query != None:
         await query.answer()
-        await query.message.reply_photo(query.message.photo, caption=f"{query.message.text}", reply_markup=reply_markup2)
+        match query.data:
+            case 'revert':
+                await query.message.reply_photo(query.message.photo, caption=f"{query.message.text}")
+            case 'confirming':
+                await query.message.reply_photo(query.message.photo, caption=f"{query.message.text}", reply_markup=reply_markup2)
+            case 'credited':
+                await query.message.reply_photo(query.message.photo, caption=f"{query.message.text}")
     else:
         await message.reply_photo(message.photo, caption=f"{message.text}", reply_markup=reply_markup)
 
@@ -344,6 +350,7 @@ def main() -> None:
     # on non command i.e message - echo the message on Telegram
     application.add_handler(MessageHandler(filters.Regex('[Tt]+[askASK]{3}') & filters.TEXT & ~filters.COMMAND, echo))
     application.add_handler(MessageHandler(filters.Regex('[vV]+erify') & filters.TEXT & ~filters.COMMAND, verify_user))
+    application.add_handler(MessageHandler(filters.PHOTO &  ~filters.COMMAND, payments_handler))
 
     # Run the bot until the user presses Ctrl-C
     application.run_polling()
