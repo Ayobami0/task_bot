@@ -1,7 +1,8 @@
 import os
 from dotenv import load_dotenv 
 
-load_dotenv('.env')
+## Tokens
+load_dotenv()
 API_TOKEN = os.getenv('BOT_TOKEN')
 
 ## Bot Configuration

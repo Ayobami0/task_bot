@@ -108,7 +108,10 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     complete_keyboard = [
         [
-            InlineKeyboardButton("Complete?", callback_data="completed"),
+            InlineKeyboardButton("Sent", callback_data="completed"),
+            InlineKeyboardButton("Invalid", callback_data="completed"),
+            InlineKeyboardButton("Reversed", callback_data="completed"),
+            InlineKeyboardButton("Was Successful", callback_data="completed"),
         ]
     ]
     resolved_keyboard = [
