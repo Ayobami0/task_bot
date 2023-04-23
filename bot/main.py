@@ -36,10 +36,10 @@ from telegram.ext import (
 )
 
 from config import API_TOKEN, TASK_DELETE_DURATION
-from filters.task_filter import TaskFilter
+from filters.task_filter import AirtimeForCashFilter, PaymentsFilter
 
 from commands.change_active_agent import change_active_agent, change_active_operator
-from commands.generate_random_pin import generate_random_pin
+from commands.generate_random_pin import generate_random_pin, confirm_email, cancel, CONFIRM_EMAIL, failed
 from commands.get_task import get_tasks
 from commands.help import help_command
 from commands.start import start
@@ -68,24 +68,28 @@ def main() -> None:
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("generateRandomPin", generate_random_pin)], 
         states={
-            # 'EMAIL': [MessageHandler(filters.Regex() & filters.TEXT, callback)],
-            'CONFIRMATION': []
+            CONFIRM_EMAIL: [MessageHandler(filters.Regex("^\w\w+.@+\w+\.\w+") & filters.TEXT, confirm_email)],
         }, 
-        fallbacks=[])
+        fallbacks=[
+            MessageHandler(~filters.Regex("^\w\w+.@+\w+\.\w+") & filters.TEXT, failed),
+            CommandHandler("cancel", cancel)
+        ])
 
     # on different commands - answer in Telegram
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("tasks", get_tasks))
     application.add_handler(CommandHandler("numberOfTasks", tasks_number_command))
-    application.add_handler(CallbackQueryHandler(verify_user, pattern='yes|no|verified'))
+
     application.add_handler(CallbackQueryHandler(payments_handler, pattern='confirming|credited|not_received|closed'))
+    application.add_handler(CallbackQueryHandler(verify_user, pattern='yes|no|verified'))
     application.add_handler(CallbackQueryHandler(echo))
 
     # on non command i.e message - echo the message on Telegram
     application.add_handler(MessageHandler(filters.Regex('[Tt]+[askASK]{3}') & filters.TEXT & ~filters.COMMAND, echo))
     application.add_handler(MessageHandler(filters.Regex('[vV]+erify') & filters.TEXT & ~filters.COMMAND, verify_user))
-    application.add_handler(MessageHandler(filters.PHOTO &  ~filters.COMMAND, payments_handler))
+    application.add_handler(MessageHandler(filters.PHOTO & PaymentsFilter() &  ~filters.COMMAND, payments_handler))
+    application.add_handler(conv_handler)
 
     # Run the bot until the user presses Ctrl-C
     application.run_polling()
