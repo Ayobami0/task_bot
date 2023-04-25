@@ -1,52 +1,47 @@
-from sqlalchemy import create_engine, ForeignKey, Column, String, Integer, CHAR
+from sqlalchemy.sql import func
+
+from sqlalchemy import (
+    CHAR,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    create_engine,)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+from models.task import Task
+
 Base = declarative_base()
 
-class Task(Base):
+
+class Tasks(Base):
     __tablename__ = "tasks"
 
     task_id = Column("id", Integer, primary_key=True)
-    amount = Column("amount", Integer)
-    date = Column("date", String)
-    biller_number = Column("biller_number", String)
-    biller = Column("biller", String)
-    email = Column("email", String)
+    date_created = Column(
+        "date_created", DateTime(timezone=True), server_default=func.now()
+    )
+    date_updated = Column(
+        "date_updated",
+        DateTime(timezone=True),
+        server_onupdate=func.now(),
+        server_default=func.now,
+    )
+    task = Column("task", String)
     status = Column("status", String)
 
-    def __init__(
-        self, 
-        task_id,
-        email, 
-        amount, 
-        date, 
-        biller_number, 
-        biller,
-        status,
-        ):
+    def __init__(self, task_id, task: Task):
         self.task_id = task_id
-        self.amount = amount
-        self.date = date
-        self.biller_number = biller_number
-        self.biller = biller
-        self.email = email
-        self.status = status
+        self.task = task.task
+        self.status = task.status
 
-engine = create_engine('sqlite:///:memory:', echo=True)
+    def __repr__(self):
+        return f"{self.task} \nStatus: {self.status}"
+
+
+engine = create_engine("sqlite:///:memory:", echo=False)
 Base.metadata.create_all(bind=engine)
 
 Session = sessionmaker(bind=engine)
-
-# task1 = Task(1, 'oludemiayobami@gmail.com', '200', '04-03-2023', '09068272767', 'MTN 1GB', 'PENDING')
-# task2 = Task(2, 'oludemiayobami@gmail.com', '230', '04-05-2023', '09068272767', 'MTN 1GB', 'COMPLETED')
-# task3 = Task(3, 'oludemiayobami@gmail.com', '500', '04-04-2023', '09068272767', 'MTN 1GB', 'PENDING')
-
-# session.add(task1)
-# session.add(task2)
-# session.add(task3)
-
-# session.commit()
-
-# results = session.query(Task).all()
-# print(results)

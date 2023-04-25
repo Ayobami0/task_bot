@@ -5,7 +5,7 @@ import re
 class PaymentsFilter(filters.MessageFilter):
     def filter(self, message: Message) -> bool:
         try:
-            if re.match('[Pp][aymentAYMENT]+', message.caption) != None:
+            if re.search('[Pp]+[aymentAYMENT]', message.caption) != None:
                 return True
         except TypeError:
             return False
@@ -14,7 +14,7 @@ class PaymentsFilter(filters.MessageFilter):
 class AirtimeForCashFilter(filters.MessageFilter):
     def filter(self, message: Message):
         try:
-            if re.match('[Aa]4[Cc]', message.caption) != None:
+            if re.search('[Aa]irtime to cash', message.caption) != None:
                 return True
         except TypeError:
             return False

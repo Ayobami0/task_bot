@@ -1,10 +1,8 @@
+from datetime import datetime
+
 class Task():
-    def __init__(self, task_info):
-        self.service_amount = task_info['service_amount']
-        self.service_date = task_info['service_date']
-        self.service_number = task_info['service_number']
-        self.service_type = task_info['service_type']
-        self.customer_email_address = task_info['email_address']
+    def __init__(self, task):
+        self.task = task
         self._status = 'PENDING'
 
     @property
@@ -16,3 +14,6 @@ class Task():
         if status not in ['PENDING', 'PROCESSING', 'RESOLVED', 'CLOSED', 'CANCELED']:
             pass
         self._status = status
+    
+    def __repr__(self) -> Task:
+        return self.task

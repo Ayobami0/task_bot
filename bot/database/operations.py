@@ -1,4 +1,4 @@
-from schema import Session, Task
+from schema import Session, Tasks
 
 
 def create(task: Task) -> None:
@@ -11,22 +11,27 @@ def read(task_id) -> Task:
         result = session.query(Task).filter(Task.task_id == task_id).scalar()
     return result
 
-def update(task_id, status):
+def read_all() -> list:
+    with Session() as session:
+        result = session.query(Task).all()
+    return result
+
+def update(task_id, status) -> None:
     with Session() as session:
         session.query(Task).filter(Task.task_id == task_id).update({Task.status: status})
         session.commit()
-def delete(task_id):
+
+def delete(task_id) -> None:
     with Session() as session:
         session.query(Task).filter(Task.task_id == task_id).delete()
 
 
-task2 = Task(2, 'oludemiayobami@gmail.com', '230', '04-05-2023', '09068272767', 'MTN 1GB', 'COMPLETED')
-task3 = Task(3, 'oludemiayobami@gmail.com', '500', '04-04-2023', '09068272767', 'MTN 1GB', 'PENDING')
+task2 = Task(2, 'oludemiayobami@gmail.com\n230\n04-05-2023\n09068272767\nMTN 1GB', 'COMPLETED')
+task3 = Task(3, 'oludemiayobami@gmail.com\n500\n04-04-2023\n09068272767\nMTN 1GB', 'PENDING')
 
 create(task2)
 create(task3)
-print(read(2))
+print(read(3).date_created)
 print(read(3).status)
 
-update(3, 'COMPLETED')
-print(read(3).status)
+print(read_all())
