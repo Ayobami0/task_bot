@@ -27,7 +27,7 @@ class Tasks(Base):
         "date_updated",
         DateTime(timezone=True),
         server_onupdate=func.now(),
-        server_default=func.now,
+        server_default=func.now(),
     )
     task = Column("task", String)
     status = Column("status", String)

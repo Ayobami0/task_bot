@@ -1,5 +1,3 @@
-from datetime import datetime
-
 class Task():
     def __init__(self, task):
         self.task = task
@@ -14,6 +12,3 @@ class Task():
         if status not in ['PENDING', 'PROCESSING', 'RESOLVED', 'CLOSED', 'CANCELED']:
             pass
         self._status = status
-    
-    def __repr__(self) -> Task:
-        return self.task
