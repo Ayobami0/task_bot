@@ -1,6 +1,6 @@
 class Task():
-    def __init__(self, task):
-        self.task = task
+    def __init__(self, message):
+        self.task = message
         self._status = 'PENDING'
 
     @property

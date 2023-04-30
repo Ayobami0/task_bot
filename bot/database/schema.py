@@ -1,17 +1,16 @@
 from sqlalchemy.sql import func
 
 from sqlalchemy import (
-    CHAR,
+    Enum,
     Column,
     DateTime,
-    ForeignKey,
     Integer,
     String,
     create_engine,)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from models.task import Task
+from models.status import Status
 
 Base = declarative_base()
 
@@ -30,18 +29,18 @@ class Tasks(Base):
         server_default=func.now(),
     )
     task = Column("task", String)
-    status = Column("status", String)
+    status = Column("status", Enum(Status))
 
-    def __init__(self, task_id, task: Task):
+    def __init__(self, task_id, task: str):
         self.task_id = task_id
-        self.task = task.task
-        self.status = task.status
+        self.task = task
+        self.status = Status.pending
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.task} \nStatus: {self.status}"
 
 
-engine = create_engine("sqlite:///:memory:", echo=False)
+engine = create_engine("sqlite:///:memory:", echo=True)
 Base.metadata.create_all(bind=engine)
 
 Session = sessionmaker(bind=engine)

@@ -5,12 +5,12 @@ from telegram import (
 from telegram.ext import (
     ContextTypes,
 )
-from models import task, task_list
+import database.operations as db
 
 async def get_tasks(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
     """Return all tasks in a single message."""
     await update.message.reply_text(
-        task_list.Tasks.get_all()
+        db.read_all()
     )

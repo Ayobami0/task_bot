@@ -66,7 +66,7 @@ def main() -> None:
 
     # conversation handlers
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler("generateRandomPin", generate_random_pin)], 
+        entry_points=[CommandHandler("generate_random_pin", generate_random_pin)], 
         states={
             CONFIRM_EMAIL: [MessageHandler(filters.Regex("^\w\w+.@+\w+\.\w+") & filters.TEXT, confirm_email)],
         }, 
@@ -79,7 +79,7 @@ def main() -> None:
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("tasks", get_tasks))
-    application.add_handler(CommandHandler("numberOfTasks", tasks_number_command))
+    application.add_handler(CommandHandler("number_of_tasks", tasks_number_command))
 
     application.add_handler(CallbackQueryHandler(payments_handler, pattern='confirming|credited|not_received|closed'))
     application.add_handler(CallbackQueryHandler(verify_user, pattern='yes|no|verified'))

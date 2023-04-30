@@ -1,38 +1,33 @@
-from schema import Session, Tasks
-from models.task import Task
+from database.schema import Session, Tasks
+from sqlalchemy import func
 
+from models.status import Status
 
-def create(task: Task) -> None:
+def create(task: str) -> None:
     with Session() as session:
         session.add(task)
         session.commit()
 
-def read(task_id) -> Task:
+def read(task_id):
     with Session() as session:
-        result = session.query(Task).filter(Task.task_id == task_id).scalar()
+        result = session.query(Tasks).filter(Tasks.task_id == task_id).scalar()
     return result
+
+def read_by_status(status: Status):
+    with Session() as session:
+        count = session.query(func.count(Tasks.status)).filter(Tasks.status == status)
+    return count
 
 def read_all() -> list:
     with Session() as session:
-        result = session.query(Task).all()
+        result = session.query(Tasks).all()
     return result
 
 def update(task_id, status) -> None:
     with Session() as session:
-        session.query(Task).filter(Task.task_id == task_id).update({Task.status: status})
+        session.query(Tasks).filter(Tasks.task_id == task_id).update({Tasks.status: status})
         session.commit()
 
 def delete(task_id) -> None:
     with Session() as session:
-        session.query(Task).filter(Task.task_id == task_id).delete()
-
-
-task2 = Task('oludemiayobami@gmail.com\n230\n04-05-2023\n09068272767\nMTN 1GB')
-task3 = Task('oludemiayobami@gmail.com\n500\n04-04-2023\n09068272767\nMTN 1GB')
-
-create(Tasks(2, task2))
-create(Tasks(3, task3))
-print(read(3).date_created)
-print(read(3).status)
-
-print(read_all())
+        session.query(Tasks).filter(Tasks.task_id == task_id).delete()

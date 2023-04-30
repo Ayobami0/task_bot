@@ -10,16 +10,18 @@ from telegram import (
 from telegram.ext import (
     ContextTypes,
 )
-from models import task, task_list
+
+import database.operations as db
+from models.status import Status
 
 async def tasks_number_command(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
     """Send a message when the command /task_no is issued."""
     await update.message.reply_text(
-        f"Task Created\nPENDINGS => {task_list.Tasks.get_pendings()}\n\
-PROCESSING => {task_list.Tasks.get_processing()}\n\
-CANCELED => {task_list.Tasks.get_canceled()}\n\
-COMPLETED => {task_list.Tasks.get_resolved()}\n\
-CLOSED => {task_list.Tasks.get_closed()}"
+        f"Task Created\nPENDINGS => {db.read_by_status(Status.pending)}\n\
+PROCESSING => {db.read_by_status(Status.processing)}\n\
+CANCELED => {db.read_by_status(Status.canceled)}\n\
+COMPLETED => {db.read_by_status(Status.resolved)}\n\
+CLOSED => {db.read_by_status(Status.closed)}"
     )

@@ -1,13 +1,15 @@
 import logging
 
-from bot_commands.delete import delete
-from config import TASK_DELETE_DURATION
-from models import task, task_list
 from telegram import (ForceReply, InlineKeyboardButton, InlineKeyboardMarkup,
                       ReplyKeyboardMarkup, Update)
 from telegram.ext import ContextTypes
-from utils.extract_task_information import extract_task
+
 from utils.timer import CountDownExecutor
+import database.operations as db
+from bot_commands.delete import delete
+from config import TASK_DELETE_DURATION
+from models import task, task_list
+from models.status import Status
 
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -39,12 +41,12 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = update.effective_message
     message_id = message.id
 
-    if query == None:
-        try :
-            task_ = task.Task(extract_task(update.message.text))
-            task_list.Tasks.add(task_, id_=message_id)
+    if query is None:
+        try:
+            task_ = db.Tasks(message_id, message.text)
+            db.create(task_)
+            # task_list.Tasks.add(task_, id_=message_id)
             reply_markup = InlineKeyboardMarkup(keyboard)
-            
             await update.message.pin()
 
             await update.message.reply_text(update.message.text, reply_markup=reply_markup)
@@ -61,7 +63,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     else:
         await query.answer()
         message_id = message_id - 2
-        task_ = task_list.Tasks.get(message_id)
+        task_ = db.read(message_id)
 
         copied_message = query.message
         reply_markup = InlineKeyboardMarkup(complete_keyboard)
@@ -69,51 +71,44 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
         match query.data:
             case "sent":
-                task_.status = "RESOLVED"
-                task_list.Tasks.update(message_id-2, task_)
+                db.update(message_id, Status.resolved)
                 await query.edit_message_text(
                     text=f"{copied_message.text}\n\nTask resolved.",
                     reply_markup=reply_resolved,
                 )
             case "refunded":
-                task_.status = "RESOLVED"
-                task_list.Tasks.update(message_id, task_)
+                db.update(message_id, Status.refunded)
                 await query.edit_message_text(
                     text=f"{copied_message.text}\n\nUser refunded.",
                     reply_markup=reply_resolved,
                 )
             case "invalid":
-                task_.status = "RESOLVED"
-                task_list.Tasks.update(message_id, task_)
+                db.update(message_id, Status.resolved)
                 await query.edit_message_text(
                     text=f"{copied_message.text}\n\nInvalid details provided, check task an try again.",
                     reply_markup=reply_resolved,
                 )
             case "success":
-                task_.status = "RESOLVED"
-                task_list.Tasks.update(message_id, task_)
+                db.update(message_id, Status.resolved)
                 await query.edit_message_text(
                     text=f"{copied_message.text}\n\nWas successful the moment it was placed",
                     reply_markup=reply_resolved,
                 )
             case "review" | "processing":
-                task_.status = "PROCESSING"
-                task_list.Tasks.update(message_id, task_)
+                db.update(message_id, Status.processing)
                 await query.edit_message_text(
                     text=f"{copied_message.text}\nTask is being processed",
                     reply_markup=reply_markup,
                 )
             case "cancel":
-                task_.status = "CANCELED"
-                task_list.Tasks.update(message_id, task_)
+                db.update(message_id, Status.canceled)
                 await query.edit_message_text(
                     text=f"{copied_message.text}\nTask canceled. Check task information and resend.\nThis task would be deleted in {TASK_DELETE_DURATION}mins",
                 )
                 # unpin message after deletion and completion
                 CountDownExecutor(TASK_DELETE_DURATION, delete(update.get_bot(), chat_id, query.message.id)).run()
             case "reverted":
-                task_.status = "CLOSED"
-                task_list.Tasks.update(message_id, task_)
+                db.update(message_id, Status.closed)
                 await query.edit_message_text(
                     text=f"{copied_message.text}\nTask is closed\nThis task will be deleted in {TASK_DELETE_DURATION}mins",
                 )
