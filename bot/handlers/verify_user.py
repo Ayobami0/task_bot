@@ -38,9 +38,10 @@ async def verify_user(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     reply_markup2 = InlineKeyboardMarkup(keyboard2)
 
     if query == None:
-        await message.pin()
         await message.reply_text(f'{message.text}\n\nMail Sent?', reply_markup=reply_markup1)
+        await message.get_bot().pin_chat_message(chat_id, message_id)
     else:
+        message_id = message_id - 1
         await query.answer()
         
         match query.data:

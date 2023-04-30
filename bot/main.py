@@ -83,6 +83,7 @@ def main() -> None:
 
     application.add_handler(CallbackQueryHandler(payments_handler, pattern='confirming|credited|not_received|closed'))
     application.add_handler(CallbackQueryHandler(verify_user, pattern='yes|no|verified'))
+    application.add_handler(CallbackQueryHandler(get_tasks, pattern='previous_page|next_page'))
     application.add_handler(CallbackQueryHandler(echo))
 
     # on non command i.e message - echo the message on Telegram

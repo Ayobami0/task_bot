@@ -47,9 +47,9 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             db.create(task_)
             # task_list.Tasks.add(task_, id_=message_id)
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await update.message.pin()
 
             await update.message.reply_text(update.message.text, reply_markup=reply_markup)
+            await update.get_bot().pin_chat_message(chat_id, message_id)
         except IndexError:
             await update.message.reply_text("""An invalid task format was entered. Created tasks should follow this format:
 1. User's email address
@@ -62,7 +62,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """)
     else:
         await query.answer()
-        message_id = message_id - 2
+        message_id = message_id - 1
         task_ = db.read(message_id)
 
         copied_message = query.message

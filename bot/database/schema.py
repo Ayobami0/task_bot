@@ -40,7 +40,7 @@ class Tasks(Base):
         return f"{self.task} \nStatus: {self.status}"
 
 
-engine = create_engine("sqlite:///:memory:", echo=True)
+engine = create_engine("sqlite:///:memory:", echo=False)
 Base.metadata.create_all(bind=engine)
 
 Session = sessionmaker(bind=engine)
