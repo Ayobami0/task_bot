@@ -42,7 +42,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if query is None:
         try:
-            task_ = db.Tasks(message_id, message.text, f'https://t.me/c/{chat_id}/{message_id+1}')
+            task_ = db.Tasks(message_id, message.text, f'https://t.me/c/{str(chat_id)[4:]}/{message_id+1}')
             db.create(task_)
             # task_list.Tasks.add(task_, id_=message_id)
             reply_markup = InlineKeyboardMarkup(keyboard)
