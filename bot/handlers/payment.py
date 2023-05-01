@@ -104,4 +104,4 @@ async def payments_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             task_creator = update.message.from_user.name
             await message.reply_text(f"{message.caption}", reply_markup=reply_markup)
-            await update.get_bot().pin_chat_message(chat_id, message_id)
+            await update.get_bot().pin_chat_message(chat_id, message_id+1)

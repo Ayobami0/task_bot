@@ -49,7 +49,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             reply_markup = InlineKeyboardMarkup(keyboard)
 
             await update.message.reply_text(update.message.text, reply_markup=reply_markup)
-            await update.get_bot().pin_chat_message(chat_id, message_id)
+            await update.get_bot().pin_chat_message(chat_id, message_id+1)
         except IndexError:
             await update.message.reply_text("""An invalid task format was entered. Created tasks should follow this format:
 1. User's email address

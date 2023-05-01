@@ -39,7 +39,7 @@ async def verify_user(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
     if query == None:
         await message.reply_text(f'{message.text}\n\nMail Sent?', reply_markup=reply_markup1)
-        await message.get_bot().pin_chat_message(chat_id, message_id)
+        await message.get_bot().pin_chat_message(chat_id, message_id+1)
     else:
         message_id = message_id - 1
         await query.answer()
