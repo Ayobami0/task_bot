@@ -9,7 +9,6 @@ from telegram import (
 from telegram.ext import (
     ContextTypes,
 )
-from models import task, task_list
 from bot_commands.delete import delete
 from bot_commands.update import update as up
 from config import TASK_DELETE_DURATION, TASK_UPDATE_DURATION

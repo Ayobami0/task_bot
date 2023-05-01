@@ -28,13 +28,15 @@ class Tasks(Base):
         server_onupdate=func.now(),
         server_default=func.now(),
     )
-    task = Column("task", String)
+    task = Column("task", String, nullable=True)
+    message_link = Column("message_link", String)
     status = Column("status", Enum(Status))
 
-    def __init__(self, task_id, task: str):
+    def __init__(self, task_id, task: str, message_link: str):
         self.task_id = task_id
         self.task = task
         self.status = Status.pending
+        self.message_link = message_link
 
     def __repr__(self) -> str:
         return f"{self.task} \nStatus: {self.status}"

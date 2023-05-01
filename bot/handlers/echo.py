@@ -8,7 +8,6 @@ from utils.timer import CountDownExecutor
 import database.operations as db
 from bot_commands.delete import delete
 from config import TASK_DELETE_DURATION
-from models import task, task_list
 from models.status import Status
 
 
@@ -43,7 +42,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if query is None:
         try:
-            task_ = db.Tasks(message_id, message.text)
+            task_ = db.Tasks(message_id, message.text, update.message.link)
             db.create(task_)
             # task_list.Tasks.add(task_, id_=message_id)
             reply_markup = InlineKeyboardMarkup(keyboard)
