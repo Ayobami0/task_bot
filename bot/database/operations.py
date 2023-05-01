@@ -26,7 +26,7 @@ def read_all(limit=10, page=1) -> str:
     message = ""
     with Session() as session:
         for task in session.query(Tasks).order_by(Tasks.date_updated.desc()).limit(limit).offset(offset).all():
-            message += f"{task.task}\nStatus: {task.status.value}\n\n"
+            message += f"{task.task}\nLink: {task.message_link}\nStatus: {task.status.value}\n\n"
     pagination = f"\n\nPage: {page}"
     return f'{message}{pagination}' if len(message) != 0 else 'There are no Tasks yet. Please create one'
 
