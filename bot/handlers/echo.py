@@ -6,13 +6,13 @@ from telegram.ext import ContextTypes
 
 from utils.timer import CountDownExecutor
 import database.operations as db
-from bot_commands.delete import delete
-from config import TASK_DELETE_DURATION
+from utils.delete_task import delete
+from config import TASK_DELETE_DURATION, TASK_IDLE_DURATION
 from models.status import Status
 
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Echo the task with inline buttons."""
+    """Main task entry."""
     keyboard = [
         [
             InlineKeyboardButton("Process", callback_data="processing"),
@@ -75,24 +75,29 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     text=f"{copied_message.text}\n\nTask resolved.",
                     reply_markup=reply_resolved,
                 )
+                # Auto delete message after specified period.
+                CountDownExecutor(TASK_IDLE_DURATION, delete(update.get_bot(), chat_id, query.message.id)).run()
             case "refunded":
                 db.update(message_id, Status.refunded)
                 await query.edit_message_text(
                     text=f"{copied_message.text}\n\nUser refunded.",
                     reply_markup=reply_resolved,
                 )
+                CountDownExecutor(TASK_IDLE_DURATION, delete(update.get_bot(), chat_id, query.message.id)).run()
             case "invalid":
                 db.update(message_id, Status.resolved)
                 await query.edit_message_text(
                     text=f"{copied_message.text}\n\nInvalid details provided, check task an try again.",
                     reply_markup=reply_resolved,
                 )
+                CountDownExecutor(TASK_IDLE_DURATION, delete(update.get_bot(), chat_id, query.message.id)).run()
             case "success":
                 db.update(message_id, Status.resolved)
                 await query.edit_message_text(
                     text=f"{copied_message.text}\n\nWas successful the moment it was placed",
                     reply_markup=reply_resolved,
                 )
+                CountDownExecutor(TASK_IDLE_DURATION, delete(update.get_bot(), chat_id, query.message.id)).run()
             case "review" | "processing":
                 db.update(message_id, Status.processing)
                 await query.edit_message_text(
@@ -112,3 +117,4 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     text=f"{copied_message.text}\nTask is closed\nThis task will be deleted in {TASK_DELETE_DURATION}mins",
                 )
                 CountDownExecutor(TASK_DELETE_DURATION, delete(update.get_bot(), chat_id, query.message.id)).run()
+            

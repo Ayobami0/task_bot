@@ -10,5 +10,5 @@ class Task():
     @status.setter
     def status(self, status):
         if status not in ['PENDING', 'PROCESSING', 'RESOLVED', 'CLOSED', 'CANCELED']:
-            pass
+            return
         self._status = status

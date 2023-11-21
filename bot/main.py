@@ -45,7 +45,7 @@ from commands.help import help_command
 from commands.start import start
 from commands.task_number import tasks_number_command
 
-from handlers.echo import echo
+from handlers.echo import task_responder
 from handlers.payment import payments_handler
 from handlers.verify_user import verify_user
 
@@ -84,10 +84,10 @@ def main() -> None:
     application.add_handler(CallbackQueryHandler(payments_handler, pattern='confirming|credited|not_received|closed'))
     application.add_handler(CallbackQueryHandler(verify_user, pattern='yes|no|verified'))
     application.add_handler(CallbackQueryHandler(get_tasks, pattern='previous_page|next_page'))
-    application.add_handler(CallbackQueryHandler(echo))
+    application.add_handler(CallbackQueryHandler(task_responder))
 
     # on non command i.e message - echo the message on Telegram
-    application.add_handler(MessageHandler(filters.Regex('[Tt]+[askASK]{3}') & filters.TEXT & ~filters.COMMAND, echo))
+    application.add_handler(MessageHandler(filters.Regex('[Tt]+[askASK]{3}') & filters.TEXT & ~filters.COMMAND, task_responder))
     application.add_handler(MessageHandler(filters.Regex('[vV]+erify') & filters.TEXT & ~filters.COMMAND, verify_user))
     application.add_handler(MessageHandler(filters.PHOTO & PaymentsFilter() &  ~filters.COMMAND, payments_handler))
     application.add_handler(conv_handler)

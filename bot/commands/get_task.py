@@ -36,13 +36,9 @@ async def get_tasks(
         await query.answer()
         match query.data:
             case 'previous_page':
-                try:
-                    page = page - 1
-                except t_error.BadRequest:
-                    logging.info('You are at the first page')
+                if page == 1:
+                    break
+                page -= 1
             case 'next_page':
-                try:
-                    page = page + 1
-                except t_error.BadRequest:
-                    logging.info('You are at the last page')
+                page += 1
         await query.edit_message_text(db.read_all(page=page), reply_markup=page_markup)
