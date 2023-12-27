@@ -10,7 +10,7 @@ from telegram.ext import (
     ContextTypes,
 )
 from models import task, task_list
-from bot_commands.delete import delete
+from utils.delete_task import delete
 from utils.extract_task_information import extract_task
 from utils.timer import CountDownExecutor
 from config import TASK_DELETE_DURATION

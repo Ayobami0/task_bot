@@ -4,13 +4,12 @@ from telegram import (
     Update,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
-    ReplyKeyboardMarkup,
 )
 from telegram.ext import (
     ContextTypes,
 )
-from bot_commands.delete import delete
-from bot_commands.update import update as up
+from utils.delete_task import delete
+from utils.update_task_status import update as up
 from config import TASK_DELETE_DURATION, TASK_UPDATE_DURATION
 from utils.timer import CountDownExecutor
 

@@ -1,7 +1,10 @@
 import logging
 
-from telegram import (ForceReply, InlineKeyboardButton, InlineKeyboardMarkup,
-                      ReplyKeyboardMarkup, Update)
+from telegram import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    Update,
+)
 from telegram.ext import ContextTypes
 
 from utils.timer import CountDownExecutor
@@ -27,7 +30,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         [
             InlineKeyboardButton("Refund", callback_data="refunded"),
             InlineKeyboardButton("Was Successful", callback_data="success"),
-        ]
+        ],
     ]
     resolved_keyboard = [
         [
@@ -42,15 +45,22 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if query is None:
         try:
-            task_ = db.Tasks(message_id, message.text, f'https://t.me/c/{str(chat_id)[4:]}/{message_id+1}')
+            task_ = db.Tasks(
+                message_id,
+                message.text,
+                f"https://t.me/c/{str(chat_id)[4:]}/{message_id+1}",
+            )
             db.create(task_)
             # task_list.Tasks.add(task_, id_=message_id)
             reply_markup = InlineKeyboardMarkup(keyboard)
 
-            await update.message.reply_text(update.message.text, reply_markup=reply_markup)
-            await update.get_bot().pin_chat_message(chat_id, message_id+1)
+            await update.message.reply_text(
+                update.message.text, reply_markup=reply_markup
+            )
+            await update.get_bot().pin_chat_message(chat_id, message_id + 1)
         except IndexError:
-            await update.message.reply_text("""An invalid task format was entered. Created tasks should follow this format:
+            await update.message.reply_text(
+                """An invalid task format was entered. Created tasks should follow this format:
 1. User's email address
 2. Service amount (i.e 250 or 1000)
 3. Sercice number (phone number, iuc number or meter number)
@@ -58,7 +68,8 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 5. Service date (the day the user placed the request)
 6. Urgency (LOW, HIGH, MEDIUM [resellers are always registered as high])
 7. Comments (additional information required)
-    """)
+    """
+            )
     else:
         await query.answer()
         message_id = message_id - 1
@@ -76,28 +87,40 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     reply_markup=reply_resolved,
                 )
                 # Auto delete message after specified period.
-                CountDownExecutor(TASK_IDLE_DURATION, delete(update.get_bot(), chat_id, query.message.id)).run()
+                CountDownExecutor(
+                    TASK_IDLE_DURATION,
+                    await delete(update.get_bot(), chat_id, query.message.id),
+                ).run()
             case "refunded":
                 db.update(message_id, Status.refunded)
                 await query.edit_message_text(
                     text=f"{copied_message.text}\n\nUser refunded.",
                     reply_markup=reply_resolved,
                 )
-                CountDownExecutor(TASK_IDLE_DURATION, delete(update.get_bot(), chat_id, query.message.id)).run()
+                CountDownExecutor(
+                    TASK_IDLE_DURATION,
+                    await delete(update.get_bot(), chat_id, query.message.id),
+                ).run()
             case "invalid":
                 db.update(message_id, Status.resolved)
                 await query.edit_message_text(
                     text=f"{copied_message.text}\n\nInvalid details provided, check task an try again.",
                     reply_markup=reply_resolved,
                 )
-                CountDownExecutor(TASK_IDLE_DURATION, delete(update.get_bot(), chat_id, query.message.id)).run()
+                CountDownExecutor(
+                    TASK_IDLE_DURATION,
+                    await delete(update.get_bot(), chat_id, query.message.id),
+                ).run()
             case "success":
                 db.update(message_id, Status.resolved)
                 await query.edit_message_text(
                     text=f"{copied_message.text}\n\nWas successful the moment it was placed",
                     reply_markup=reply_resolved,
                 )
-                CountDownExecutor(TASK_IDLE_DURATION, delete(update.get_bot(), chat_id, query.message.id)).run()
+                CountDownExecutor(
+                    TASK_IDLE_DURATION,
+                    await delete(update.get_bot(), chat_id, query.message.id),
+                ).run()
             case "review" | "processing":
                 db.update(message_id, Status.processing)
                 await query.edit_message_text(
@@ -110,11 +133,16 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     text=f"{copied_message.text}\nTask canceled. Check task information and resend.\nThis task would be deleted in {TASK_DELETE_DURATION}mins",
                 )
                 # unpin message after deletion and completion
-                CountDownExecutor(TASK_DELETE_DURATION, delete(update.get_bot(), chat_id, query.message.id)).run()
+                CountDownExecutor(
+                    TASK_DELETE_DURATION,
+                    delete(update.get_bot(), chat_id, query.message.id),
+                ).run()
             case "reverted":
                 db.update(message_id, Status.closed)
                 await query.edit_message_text(
                     text=f"{copied_message.text}\nTask is closed\nThis task will be deleted in {TASK_DELETE_DURATION}mins",
                 )
-                CountDownExecutor(TASK_DELETE_DURATION, delete(update.get_bot(), chat_id, query.message.id)).run()
-            
+                CountDownExecutor(
+                    TASK_DELETE_DURATION,
+                    await delete(update.get_bot(), chat_id, query.message.id),
+                ).run()

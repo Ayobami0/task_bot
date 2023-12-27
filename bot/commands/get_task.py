@@ -5,7 +5,6 @@ from telegram import (
 from telegram.ext import (
     ContextTypes,
 )
-import telegram.error as t_error
 
 import database.operations as db
 
@@ -36,9 +35,8 @@ async def get_tasks(
         await query.answer()
         match query.data:
             case 'previous_page':
-                if page == 1:
-                    break
-                page -= 1
+                if page != 1:
+                    page -= 1
             case 'next_page':
                 page += 1
         await query.edit_message_text(db.read_all(page=page), reply_markup=page_markup)
