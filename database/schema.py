@@ -46,7 +46,7 @@ class Tasks(Base):
 
 if config.ENVIRONMENT == "production":
     echo = False
-    db_url = f"postgresql+pyscopg2://{config.PG_USER}:\
+    db_url = f"postgresql://{config.PG_USER}:\
 {config.PG_PASSWORD}@{config.PG_HOST}:\
 {config.PG_PORT}/{config.PG_DB}"
 else:
