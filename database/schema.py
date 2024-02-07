@@ -6,11 +6,13 @@ from sqlalchemy import (
     DateTime,
     Integer,
     String,
-    create_engine,)
+    create_engine,
+)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from models.status import Status
+import config
 
 Base = declarative_base()
 
@@ -42,7 +44,17 @@ class Tasks(Base):
         return f"{self.task} \nStatus: {self.status}"
 
 
-engine = create_engine("sqlite:///./tasks.db", echo=False)
+if config.ENVIRONMENT == "production":
+    echo = False
+    db_url = f"postgresql+pyscopg2://{config.PG_USER}:\
+{config.PG_PASSWORD}@{config.PG_HOST}:\
+{config.PG_PORT}/{config.PG_DB}"
+else:
+    db_url = "sqlite:///./tasks.db"
+    echo = True
+
+
+engine = create_engine(db_url, echo=echo)
 Base.metadata.create_all(bind=engine)
 
 Session = sessionmaker(bind=engine)
